@@ -1,0 +1,18 @@
+{
+    "include": [
+        {
+            "keyboard": "split_ortho_rtrb",
+            "keymap": "vial",
+            "target": "uf2",
+            "flags": "EXTRAFLAGS=-DINIT_EE_HANDS_LEFT",
+            "name": "split_ortho_rtrb_vial_left"
+        },
+        {
+            "keyboard": "split_ortho_rtrb",
+            "keymap": "vial",
+            "target": "uf2",
+            "flags": "EXTRAFLAGS=-DINIT_EE_HANDS_RIGHT",
+            "name": "split_ortho_rtrb_vial_right"
+        }
+    ]
+}
