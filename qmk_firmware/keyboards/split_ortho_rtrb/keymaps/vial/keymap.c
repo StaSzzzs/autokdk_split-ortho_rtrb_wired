@@ -1,8 +1,7 @@
 #include QMK_KEYBOARD_H
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {};
 
-if(0)
-{
+#if(0)
 // レイヤー名を定義します
 enum layer_names {
     _BASE = 0,    // Layer 0: 通常のQWERTY配列
@@ -83,5 +82,4 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     _______, _______, _______, _______, _______, KC_BTN1
 ),
 };
-
-};
+#endif
