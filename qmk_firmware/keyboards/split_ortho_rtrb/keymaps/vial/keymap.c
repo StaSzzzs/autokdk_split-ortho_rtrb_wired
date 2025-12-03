@@ -2,7 +2,7 @@
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {};
 
 // 初期CPI値を定義
-#define DEFAULT_CPI 1000
+#define DEFAULT_CPI 2000
 
 // 起動時にCPIを設定する
 void keyboard_post_init_user(void) {
