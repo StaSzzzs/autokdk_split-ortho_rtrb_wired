@@ -1,57 +1,13 @@
 #include QMK_KEYBOARD_H
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {};
 
-static uint16_t current_cpi = 800; // 初期値
+// 初期CPI値を定義
+#define DEFAULT_CPI 1000
 
-
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    if (record->event.pressed) {
-        switch (keycode) {
-            case KC_CPI_UP:
-                if (current_cpi + CPI_STEP <= CPI_MAX) {
-                    current_cpi += CPI_STEP;
-                    pointing_device_set_cpi(current_cpi);
-                }
-                return false;
-
-            case KC_CPI_DOWN:
-                if (current_cpi - CPI_STEP >= CPI_MIN) {
-                    current_cpi -= CPI_STEP;
-                    pointing_device_set_cpi(current_cpi);
-                }
-                return false;
-
-            case KC_CPI_DEFAULT:
-                current_cpi = 800; // 好きなデフォルト値
-                pointing_device_set_cpi(current_cpi);
-                return false;
-
-            case KC_CPI_NEXT:
-                // プリセット配列を回す方式
-                {
-                    static const uint16_t presets[] = {400, 800, 1200, 1600};
-                    static uint8_t idx = 0;
-                    idx = (idx + 1) % (sizeof(presets)/sizeof(presets[0]));
-                    current_cpi = presets[idx];
-                    pointing_device_set_cpi(current_cpi);
-                }
-                return false;
-
-            case KC_CPI_PREV:
-                {
-                    static const uint16_t presets[] = {400, 800, 1200, 1600};
-                    static uint8_t idx = 0;
-                    idx = (idx + sizeof(presets)/sizeof(presets[0]) - 1) %
-                          (sizeof(presets)/sizeof(presets[0]));
-                    current_cpi = presets[idx];
-                    pointing_device_set_cpi(current_cpi);
-                }
-                return false;
-        }
-    }
-    return true;
+// 起動時にCPIを設定する
+void keyboard_post_init_user(void) {
+    pointing_device_set_cpi(DEFAULT_CPI);
 }
-
 
 
 
