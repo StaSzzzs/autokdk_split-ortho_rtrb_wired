@@ -5,6 +5,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {};
 #include QMK_KEYBOARD_H
 
 static uint16_t current_cpi = 800; // 初期値
+#define CPI_STEP 38
+#define CPI_MIN (16 * CPI_STEP)
+#define CPI_MAX (127 * CPI_STEP)
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     if (record->event.pressed) {
