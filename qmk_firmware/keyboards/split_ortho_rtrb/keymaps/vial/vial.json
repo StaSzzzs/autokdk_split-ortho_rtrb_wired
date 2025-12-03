@@ -104,5 +104,15 @@
                 "9,6\n\n\n0,0"
             ]
         ]
+    "keycodes": {
+        "quantum": [
+            "RESET",
+            "KC_CPI_UP",
+            "KC_CPI_DOWN",
+            "KC_CPI_DEFAULT",
+            "KC_CPI_PREV",
+            "KC_CPI_NEXT"
+            ]        
+  }
     }
 }
