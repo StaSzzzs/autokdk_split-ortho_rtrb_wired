@@ -30,6 +30,6 @@ The build workflow produces left- and right-hand UF2 files.
 
 The former Vial-only tap-dance keys are left blank because their actions were
 stored in Vial and are not part of the source keymap. Vial combo actions are
-also not migrated. VIA macro keycodes and the four keymap layers remain
-available; recreate macro contents in Remap if they do not carry over from the
-previous firmware.
+also not migrated. VIA macro keycodes and five keymap layers remain available.
+Layer 1 switches the trackball from pointer movement to scrolling. Recreate
+macro contents in Remap if they do not carry over from the previous firmware.
