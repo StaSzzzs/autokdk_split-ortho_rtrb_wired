@@ -49,8 +49,6 @@ typedef struct {
   bool isMotion;
 } report_paw3222_t;
 
-const pointing_device_driver_t paw3222_pointing_device_driver;
-
 /**
  * @brief Initializes the sensor so it is in a working state and ready to
  * be polled for data.
@@ -58,7 +56,7 @@ const pointing_device_driver_t paw3222_pointing_device_driver;
  * @return true Initialization was a success
  * @return false Initialization failed, do not proceed operation
  */
-void paw3222_init(void);
+bool paw3222_init(void);
 
 /**
  * @brief Reads and clears the current delta, and motion register values on the

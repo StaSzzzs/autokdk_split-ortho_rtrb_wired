@@ -2,17 +2,17 @@
     "include": [
         {
             "keyboard": "split_ortho_rtrb",
-            "keymap": "vial",
+            "keymap": "via",
             "target": "uf2",
             "flags": "EXTRAFLAGS=-DINIT_EE_HANDS_LEFT",
-            "name": "split_ortho_rtrb_vial_left"
+            "name": "split_ortho_rtrb_via_left"
         },
         {
             "keyboard": "split_ortho_rtrb",
-            "keymap": "vial",
+            "keymap": "via",
             "target": "uf2",
             "flags": "EXTRAFLAGS=-DINIT_EE_HANDS_RIGHT",
-            "name": "split_ortho_rtrb_vial_right"
+            "name": "split_ortho_rtrb_via_right"
         }
     ]
 }

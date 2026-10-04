@@ -1,0 +1,5 @@
+VIA_ENABLE = yes
+MOUSEKEY_ENABLE = yes
+
+POINTING_DEVICE_DRIVER = custom
+SRC += paw3222.c

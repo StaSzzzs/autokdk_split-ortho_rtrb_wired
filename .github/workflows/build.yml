@@ -6,5 +6,65 @@ on:
       - "**"
 
 jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: set-matrix
+        run: |
+          content=`cat target.json`
+          echo "matrix=$(echo $content)" >> $GITHUB_OUTPUT
+
   build:
-    uses: sekigon-gonnoc/vial-keymap-c-editor/.github/workflows/build-keymap.yml@main
+    needs: matrix
+    runs-on: ubuntu-latest
+    container: qmkfm/qmk_cli@sha256:a78acc2b7de1f476f33dd0d069c0e74ddfdb52c18b9a504c7cce32303cfa7aa2
+    strategy:
+      matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v4
+        with:
+          path: target-repo
+
+      - name: Checkout QMK
+        uses: actions/checkout@v4
+        with:
+          repository: qmk/qmk_firmware
+          ref: 0.34.0
+          path: qmk
+
+      - name: Add custom keyboard
+        run: cp -r target-repo/qmk_firmware/keyboards/split_ortho_rtrb qmk/keyboards/
+
+      - name: Setup QMK
+        working-directory: qmk
+        run: |
+          python3 -m pip install -r requirements.txt
+          qmk setup -y
+
+      - name: Build firmware
+        working-directory: qmk
+        run: |
+          make ${{ matrix.keyboard }}:${{ matrix.keymap }}:${{ matrix.target }} ${{ matrix.flags }}
+          mv .build/${{ matrix.keyboard }}_${{ matrix.keymap }}.${{ matrix.target }} .build/${{ matrix.name }}.${{ matrix.target }}
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-${{ matrix.name }}
+          path: qmk/.build/${{ matrix.name }}.${{ matrix.target }}
+
+  merge:
+    runs-on: ubuntu-latest
+    needs: build
+    name: Merge Artifacts
+    steps:
+      - name: Merge Artifacts
+        uses: actions/upload-artifact/merge@v4
+        with:
+          name: firmware
+          pattern: artifact-*
+          delete-merged: true

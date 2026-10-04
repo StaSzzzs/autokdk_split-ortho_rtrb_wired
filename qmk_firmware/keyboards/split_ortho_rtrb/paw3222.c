@@ -62,14 +62,7 @@ void paw3222_serial_write(uint8_t reg_addr);
 uint8_t paw3222_read_reg(uint8_t reg_addr);
 void paw3222_write_reg(uint8_t reg_addr, uint8_t data);
 
-const pointing_device_driver_t paw3222_pointing_device_driver = {
-    .init = paw3222_init,
-    .get_report = paw3222_get_report,
-    .set_cpi = paw3222_set_cpi,
-    .get_cpi = paw3222_get_cpi,
-};
-
-void paw3222_init(void) {
+bool paw3222_init(void) {
   gpio_write_pin_high(PAW3222_CS_PIN);       // set cs pin high
   gpio_set_pin_output(PAW3222_CS_PIN);       // set cs pin to output
   gpio_write_pin_high(PAW3222_SCLK_PIN);     // set clock pin high
@@ -85,6 +78,8 @@ void paw3222_init(void) {
   paw3222_read_reg(0x03);
   paw3222_read_reg(0x04);
   paw3222_read_reg(0x12);
+
+  return true;
 }
 
 uint8_t paw3222_serial_read(void) {
@@ -181,7 +176,7 @@ report_mouse_t paw3222_get_report(report_mouse_t mouse_report) {
   return mouse_report;
 }
 
-void pointing_device_driver_init(void) { paw3222_init(); }
+bool pointing_device_driver_init(void) { return paw3222_init(); }
 
 report_mouse_t pointing_device_driver_get_report(report_mouse_t mouse_report) {
   return paw3222_get_report(mouse_report);
