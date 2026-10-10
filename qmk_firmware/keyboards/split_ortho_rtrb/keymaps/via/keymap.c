@@ -51,6 +51,20 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         return true;
     }
 
+    if (IS_LAYER_ON(AUTO_MOUSE_DEFAULT_LAYER)) {
+        switch (keycode) {
+            case MS_BTN1:
+            case MS_BTN2:
+            case MS_BTN3:
+            case MS_BTN4:
+            case MS_BTN5:
+                break;
+            default:
+                auto_mouse_reset_trigger(true);
+                break;
+        }
+    }
+
     switch (keycode) {
         case AML_TO:
             set_auto_mouse_enable(!get_auto_mouse_enable());
