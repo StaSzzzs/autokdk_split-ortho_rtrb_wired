@@ -6,8 +6,14 @@
 #define SCROLL_DIVISOR_MIN 1
 #define SCROLL_DIVISOR_MAX 16
 #define SCROLL_HORIZONTAL_DEADZONE 3
+#define AML_TIMEOUT_MIN 100
+#define AML_TIMEOUT_MAX 1000
+#define AML_TIMEOUT_QUANTUM 50
 
 enum custom_keycodes {
+    AML_TO = QK_KB_10,
+    AML_I50 = QK_KB_11,
+    AML_D50 = QK_KB_12,
     CK_SCROLL_SLOWER = SAFE_RANGE,
     CK_SCROLL_FASTER,
 };
@@ -42,6 +48,19 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     }
 
     switch (keycode) {
+        case AML_TO:
+            set_auto_mouse_enable(!get_auto_mouse_enable());
+            return false;
+        case AML_I50: {
+            uint16_t timeout = get_auto_mouse_timeout() + AML_TIMEOUT_QUANTUM;
+            set_auto_mouse_timeout(MIN(timeout, AML_TIMEOUT_MAX));
+            return false;
+        }
+        case AML_D50: {
+            uint16_t timeout = get_auto_mouse_timeout() - AML_TIMEOUT_QUANTUM;
+            set_auto_mouse_timeout(MAX(timeout, AML_TIMEOUT_MIN));
+            return false;
+        }
         case CK_SCROLL_SLOWER:
             if (scroll_divisor < SCROLL_DIVISOR_MAX) {
                 scroll_divisor++;
@@ -131,7 +150,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TRNS, KC_F1, KC_F2, KC_F3, KC_F4, KC_F5,
         KC_TAB, KC_TRNS, KC_HOME, KC_UP, KC_END, KC_PGUP,
         KC_TRNS, KC_TRNS, KC_LEFT, KC_DOWN, KC_RIGHT, KC_PGDN,
-        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, QK_MACRO_2,
+        AML_TO, AML_I50, AML_D50, KC_TRNS, KC_TRNS, QK_MACRO_2,
         KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
         KC_TRNS, KC_TRNS, KC_F6, KC_F7, KC_F8, KC_F9,
         KC_F10, KC_F11, KC_VOLU, KC_KP_7, KC_KP_8, KC_KP_9,
@@ -144,9 +163,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
         KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
         KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, MS_BTN3, KC_TRNS,
         KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
-        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
-        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+        KC_TRNS, KC_TRNS, MS_BTN4, MS_BTN1, MS_BTN2, KC_TRNS,
         KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
         KC_TRNS, KC_TRNS, KC_TRNS, 0x5DAF, KC_TRNS, KC_TRNS,
         KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,

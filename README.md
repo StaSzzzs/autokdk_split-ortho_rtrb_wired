@@ -37,3 +37,10 @@ Scrolling reverses the vertical direction and defaults to one quarter of the
 previous sensitivity. On Layer 1, the two keys next to `QK_BOOT` decrease or
 increase scroll speed; the selected speed is saved in EEPROM. Small horizontal
 trackball movements are ignored to prevent unintended horizontal scrolling.
+Layer 4 is the automatic mouse layer: trackball activity activates it, and it
+deactivates after 650 ms without mouse activity. It duplicates the mouse
+button keys from Layer 2. The standard QMK non-mouse-key delay and movement
+threshold are unchanged. On Layer 3, the first three keys of the fourth row
+toggle the feature (`AML_TO`), increase its timeout by 50 ms (`AML_I50`), and
+decrease it by 50 ms (`AML_D50`). The timeout can be adjusted from 100 ms to
+1000 ms.
