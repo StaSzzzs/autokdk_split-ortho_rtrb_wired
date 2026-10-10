@@ -5,7 +5,7 @@
 #define SCROLL_DIVISOR_DEFAULT 4
 #define SCROLL_DIVISOR_MIN 1
 #define SCROLL_DIVISOR_MAX 16
-#define SCROLL_HORIZONTAL_DEADZONE 1
+#define SCROLL_HORIZONTAL_DEADZONE 2
 #define SCROLL_HORIZONTAL_DEADZONE_BYPASS_MS 500
 #define AML_TIMEOUT_MIN 100
 #define AML_TIMEOUT_MAX 1000
@@ -87,7 +87,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
-    if (get_highest_layer(layer_state) == 3) {
+    if (IS_LAYER_ON(3)) {
         int8_t x = mouse_report.x;
         int8_t y = mouse_report.y;
 

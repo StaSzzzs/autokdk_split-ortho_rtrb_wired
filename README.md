@@ -40,8 +40,9 @@ deadzone is half its previous size; after movement crosses it, the deadzone is
 disabled for 500 ms.
 The automatic mouse layer is enabled by default on startup. Layer 4 is its
 target: trackball activity activates it, and it
-deactivates after 650 ms without mouse activity. It duplicates the mouse
-button keys from Layer 2. The standard QMK non-mouse-key delay and movement
+deactivates after 650 ms without mouse activity. It overlays the active layer,
+so Layer 3 scrolling remains available while Layer 4 is active. It duplicates
+the mouse button keys from Layer 2. The standard QMK non-mouse-key delay and movement
 threshold are unchanged. On Layer 3, the first three keys of the fourth row
 toggle the feature (`AML_TO`), increase its timeout by 50 ms (`AML_I50`), and
 decrease it by 50 ms (`AML_D50`). The timeout can be adjusted from 100 ms to
