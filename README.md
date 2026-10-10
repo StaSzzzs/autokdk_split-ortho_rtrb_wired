@@ -34,10 +34,11 @@ also not migrated. VIA macro keycodes and five keymap layers remain available.
 Layer 3 switches the trackball from pointer movement to scrolling. Recreate
 macro contents in Remap if they do not carry over from the previous firmware.
 Scrolling reverses the vertical direction and defaults to one quarter of the
-previous sensitivity. On Layer 1, the two keys next to `QK_BOOT` decrease or
-increase scroll speed; the selected speed is saved in EEPROM. The horizontal
-deadzone is half its previous size; after movement crosses it, the deadzone is
-disabled for 500 ms.
+previous sensitivity. On Layer 1, the two keys next to `QK_BOOT`
+(`CK_SCROLL_SLOWER` and `CK_SCROLL_FASTER`) decrease or increase scroll speed;
+the selected speed is saved in EEPROM. In Remap/VIA, these custom keycodes are
+shown as `User0` and `User1`. The horizontal deadzone is half its previous size;
+after movement crosses it, the deadzone is disabled for 500 ms.
 The automatic mouse layer is enabled by default on startup. Layer 4 is its
 target: trackball activity activates it, and it
 deactivates after 650 ms without mouse activity. It overlays the active layer,
@@ -45,5 +46,6 @@ so Layer 3 scrolling remains available while Layer 4 is active. It duplicates
 the mouse button keys from Layer 2. The standard QMK non-mouse-key delay and movement
 threshold are unchanged. On Layer 3, the first three keys of the fourth row
 toggle the feature (`AML_TO`), increase its timeout by 50 ms (`AML_I50`), and
-decrease it by 50 ms (`AML_D50`). The timeout can be adjusted from 100 ms to
-1000 ms.
+decrease it by 50 ms (`AML_D50`). In Remap/VIA, these custom keycodes are shown
+as `Kb10`, `Kb11`, and `Kb12`. The timeout can be adjusted from 100 ms to 1000
+ms.
