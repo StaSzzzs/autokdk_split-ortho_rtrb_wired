@@ -31,12 +31,13 @@ The build workflow produces left- and right-hand UF2 files.
 The former Vial-only tap-dance keys are left blank because their actions were
 stored in Vial and are not part of the source keymap. Vial combo actions are
 also not migrated. VIA macro keycodes and five keymap layers remain available.
-Layer 1 switches the trackball from pointer movement to scrolling. Recreate
+Layer 3 switches the trackball from pointer movement to scrolling. Recreate
 macro contents in Remap if they do not carry over from the previous firmware.
 Scrolling reverses the vertical direction and defaults to one quarter of the
 previous sensitivity. On Layer 1, the two keys next to `QK_BOOT` decrease or
-increase scroll speed; the selected speed is saved in EEPROM. Small horizontal
-trackball movements are ignored to prevent unintended horizontal scrolling.
+increase scroll speed; the selected speed is saved in EEPROM. The horizontal
+deadzone is half its previous size; after movement crosses it, the deadzone is
+disabled for 500 ms.
 Layer 4 is the automatic mouse layer: trackball activity activates it, and it
 deactivates after 650 ms without mouse activity. It duplicates the mouse
 button keys from Layer 2. The standard QMK non-mouse-key delay and movement

@@ -5,7 +5,8 @@
 #define SCROLL_DIVISOR_DEFAULT 4
 #define SCROLL_DIVISOR_MIN 1
 #define SCROLL_DIVISOR_MAX 16
-#define SCROLL_HORIZONTAL_DEADZONE 3
+#define SCROLL_HORIZONTAL_DEADZONE 1
+#define SCROLL_HORIZONTAL_DEADZONE_BYPASS_MS 500
 #define AML_TIMEOUT_MIN 100
 #define AML_TIMEOUT_MAX 1000
 #define AML_TIMEOUT_QUANTUM 50
@@ -21,6 +22,8 @@ enum custom_keycodes {
 static uint8_t scroll_divisor = SCROLL_DIVISOR_DEFAULT;
 static int16_t scroll_x_accumulator;
 static int16_t scroll_y_accumulator;
+static uint32_t scroll_x_deadzone_bypass_timer;
+static bool scroll_x_deadzone_bypass_active;
 
 static int8_t clamp_scroll_delta(int16_t delta) {
     if (delta > 127) {
@@ -83,13 +86,22 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 }
 
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
-    if (get_highest_layer(layer_state) == 1) {
+    if (get_highest_layer(layer_state) == 3) {
         int8_t x = mouse_report.x;
         int8_t y = mouse_report.y;
 
         if (x <= -SCROLL_HORIZONTAL_DEADZONE ||
             x >= SCROLL_HORIZONTAL_DEADZONE) {
+            scroll_x_deadzone_bypass_timer = timer_read32();
+            scroll_x_deadzone_bypass_active = true;
+        }
+
+        if (scroll_x_deadzone_bypass_active &&
+            timer_elapsed32(scroll_x_deadzone_bypass_timer) <
+                SCROLL_HORIZONTAL_DEADZONE_BYPASS_MS) {
             scroll_x_accumulator += x;
+        } else {
+            scroll_x_deadzone_bypass_active = false;
         }
         scroll_y_accumulator -= y;
 
