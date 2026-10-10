@@ -5,6 +5,7 @@
 #define SCROLL_DIVISOR_DEFAULT 4
 #define SCROLL_DIVISOR_MIN 1
 #define SCROLL_DIVISOR_MAX 16
+#define SCROLL_REPORT_INTERVAL_MS 8
 #define SCROLL_HORIZONTAL_DEADZONE 2
 #define SCROLL_HORIZONTAL_DEADZONE_BYPASS_MS 500
 #define AML_TIMEOUT_MIN 100
@@ -20,10 +21,22 @@ enum custom_keycodes {
 };
 
 static uint8_t scroll_divisor = SCROLL_DIVISOR_DEFAULT;
-static int16_t scroll_x_accumulator;
-static int16_t scroll_y_accumulator;
+static int32_t scroll_x_accumulator;
+static int32_t scroll_y_accumulator;
 static uint32_t scroll_x_deadzone_bypass_timer;
 static bool scroll_x_deadzone_bypass_active;
+static uint32_t scroll_report_timer;
+static bool scroll_report_timer_active;
+
+static mouse_hv_report_t clamp_scroll_delta(int32_t delta) {
+    if (delta > MOUSE_REPORT_HV_MAX) {
+        return MOUSE_REPORT_HV_MAX;
+    }
+    if (delta < MOUSE_REPORT_HV_MIN) {
+        return MOUSE_REPORT_HV_MIN;
+    }
+    return (mouse_hv_report_t)delta;
+}
 
 void keyboard_post_init_user(void) {
     uint32_t stored_scroll_divisor = eeconfig_read_user();
@@ -112,10 +125,23 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
         scroll_y_accumulator -=
             y * POINTING_DEVICE_HIRES_SCROLL_MULTIPLIER;
 
-        mouse_report.h = scroll_x_accumulator / scroll_divisor;
-        mouse_report.v = scroll_y_accumulator / scroll_divisor;
-        scroll_x_accumulator %= scroll_divisor;
-        scroll_y_accumulator %= scroll_divisor;
+        mouse_report.h = 0;
+        mouse_report.v = 0;
+        if (!scroll_report_timer_active ||
+            timer_elapsed32(scroll_report_timer) >=
+                SCROLL_REPORT_INTERVAL_MS) {
+            mouse_report.h =
+                clamp_scroll_delta(scroll_x_accumulator / scroll_divisor);
+            mouse_report.v =
+                clamp_scroll_delta(scroll_y_accumulator / scroll_divisor);
+            scroll_x_accumulator -= mouse_report.h * scroll_divisor;
+            scroll_y_accumulator -= mouse_report.v * scroll_divisor;
+
+            if (mouse_report.h != 0 || mouse_report.v != 0) {
+                scroll_report_timer = timer_read32();
+                scroll_report_timer_active = true;
+            }
+        }
         mouse_report.x = 0;
         mouse_report.y = 0;
     }

@@ -35,8 +35,10 @@ Layer 3 switches the trackball from pointer movement to scrolling. Recreate
 macro contents in Remap if they do not carry over from the previous firmware.
 Scrolling reverses the vertical direction and defaults to one quarter of the
 previous sensitivity. High-resolution wheel reports provide finer tracking
-without changing the total scroll distance or horizontal deadzone. On Layer 1,
-the two keys next to `QK_BOOT`
+without changing the total scroll distance or horizontal deadzone. Scroll
+reports are limited to one every 8 ms; movement during that interval is
+accumulated and sent in the next report. On Layer 1, the two keys next to
+`QK_BOOT`
 (`CK_SCROLL_SLOWER` and `CK_SCROLL_FASTER`) decrease or increase scroll speed;
 the selected speed is saved in EEPROM. In Remap/VIA, these custom keycodes are
 shown as `User0` and `User1`. The horizontal deadzone is half its previous size;
