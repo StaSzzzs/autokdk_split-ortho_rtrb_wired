@@ -1,15 +1,85 @@
 #include QMK_KEYBOARD_H
+#include "eeconfig.h"
 
 #define DEFAULT_CPI 1500
+#define SCROLL_DIVISOR_DEFAULT 4
+#define SCROLL_DIVISOR_MIN 1
+#define SCROLL_DIVISOR_MAX 16
+#define SCROLL_HORIZONTAL_DEADZONE 3
+
+enum custom_keycodes {
+    CK_SCROLL_SLOWER = SAFE_RANGE,
+    CK_SCROLL_FASTER,
+};
+
+static uint8_t scroll_divisor = SCROLL_DIVISOR_DEFAULT;
+static int16_t scroll_x_accumulator;
+static int16_t scroll_y_accumulator;
+
+static int8_t clamp_scroll_delta(int16_t delta) {
+    if (delta > 127) {
+        return 127;
+    }
+    if (delta < -128) {
+        return -128;
+    }
+    return delta;
+}
 
 void keyboard_post_init_user(void) {
+    uint32_t stored_scroll_divisor = eeconfig_read_user();
+    if (stored_scroll_divisor >= SCROLL_DIVISOR_MIN &&
+        stored_scroll_divisor <= SCROLL_DIVISOR_MAX) {
+        scroll_divisor = stored_scroll_divisor;
+    }
+
     pointing_device_set_cpi(DEFAULT_CPI);
 }
 
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (!record->event.pressed) {
+        return true;
+    }
+
+    switch (keycode) {
+        case CK_SCROLL_SLOWER:
+            if (scroll_divisor < SCROLL_DIVISOR_MAX) {
+                scroll_divisor++;
+                eeconfig_update_user(scroll_divisor);
+                scroll_x_accumulator = 0;
+                scroll_y_accumulator = 0;
+            }
+            return false;
+        case CK_SCROLL_FASTER:
+            if (scroll_divisor > SCROLL_DIVISOR_MIN) {
+                scroll_divisor--;
+                eeconfig_update_user(scroll_divisor);
+                scroll_x_accumulator = 0;
+                scroll_y_accumulator = 0;
+            }
+            return false;
+    }
+
+    return true;
+}
+
 report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
-    if (get_highest_layer(layer_state) == 2) {
-        mouse_report.h = mouse_report.x;
-        mouse_report.v = mouse_report.y;
+    if (get_highest_layer(layer_state) == 1) {
+        int8_t x = mouse_report.x;
+        int8_t y = mouse_report.y;
+
+        if (x <= -SCROLL_HORIZONTAL_DEADZONE ||
+            x >= SCROLL_HORIZONTAL_DEADZONE) {
+            scroll_x_accumulator += x;
+        }
+        scroll_y_accumulator -= y;
+
+        mouse_report.h =
+            clamp_scroll_delta(scroll_x_accumulator / scroll_divisor);
+        mouse_report.v =
+            clamp_scroll_delta(scroll_y_accumulator / scroll_divisor);
+        scroll_x_accumulator %= scroll_divisor;
+        scroll_y_accumulator %= scroll_divisor;
         mouse_report.x = 0;
         mouse_report.y = 0;
     }
@@ -36,7 +106,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         LGUI(KC_TAB), KC_TRNS, KC_HOME, LGUI(KC_UP), KC_END, KC_PGUP,
         KC_TRNS, KC_TRNS, LGUI(KC_LEFT), LGUI(KC_DOWN), LGUI(KC_RIGHT), KC_PGDN,
         0x5DA6, 0x5DAF, 0x5DAE, 0x5DAD, 0x5DA8, 0x5DA7,
-        QK_BOOT, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+        QK_BOOT, CK_SCROLL_SLOWER, CK_SCROLL_FASTER, KC_TRNS, KC_TRNS, KC_TRNS,
         KC_TRNS, QK_MACRO_1, KC_F6, KC_F7, KC_F8, KC_F9,
         KC_F10, KC_F11, KC_TRNS, KC_TRNS, (QK_LCTL | QK_LGUI | KC_LEFT), SGUI(KC_LEFT),
         KC_F12, KC_TRNS, KC_TRNS, SGUI(KC_LEFT), (QK_LCTL | QK_LGUI | KC_RIGHT), SGUI(KC_RIGHT),

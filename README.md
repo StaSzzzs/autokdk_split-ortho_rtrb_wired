@@ -33,3 +33,7 @@ stored in Vial and are not part of the source keymap. Vial combo actions are
 also not migrated. VIA macro keycodes and five keymap layers remain available.
 Layer 1 switches the trackball from pointer movement to scrolling. Recreate
 macro contents in Remap if they do not carry over from the previous firmware.
+Scrolling reverses the vertical direction and defaults to one quarter of the
+previous sensitivity. On Layer 1, the two keys next to `QK_BOOT` decrease or
+increase scroll speed; the selected speed is saved in EEPROM. Small horizontal
+trackball movements are ignored to prevent unintended horizontal scrolling.
