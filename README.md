@@ -38,7 +38,8 @@ previous sensitivity. On Layer 1, the two keys next to `QK_BOOT` decrease or
 increase scroll speed; the selected speed is saved in EEPROM. The horizontal
 deadzone is half its previous size; after movement crosses it, the deadzone is
 disabled for 500 ms.
-Layer 4 is the automatic mouse layer: trackball activity activates it, and it
+The automatic mouse layer is enabled by default on startup. Layer 4 is its
+target: trackball activity activates it, and it
 deactivates after 650 ms without mouse activity. It duplicates the mouse
 button keys from Layer 2. The standard QMK non-mouse-key delay and movement
 threshold are unchanged. On Layer 3, the first three keys of the fourth row
