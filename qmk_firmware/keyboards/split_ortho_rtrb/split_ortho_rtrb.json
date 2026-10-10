@@ -2,7 +2,10 @@
   "name": "split_ortho_rtrb",
   "vendorId": "0xFEED",
   "productId": "0x0000",
-  "m
+  "matrix": {
+    "rows": 10,
+    "cols": 7
+  },
   "layouts": {
     "labels": [
       [
