@@ -25,16 +25,6 @@ static int16_t scroll_y_accumulator;
 static uint32_t scroll_x_deadzone_bypass_timer;
 static bool scroll_x_deadzone_bypass_active;
 
-static int8_t clamp_scroll_delta(int16_t delta) {
-    if (delta > 127) {
-        return 127;
-    }
-    if (delta < -128) {
-        return -128;
-    }
-    return delta;
-}
-
 void keyboard_post_init_user(void) {
     uint32_t stored_scroll_divisor = eeconfig_read_user();
     if (stored_scroll_divisor >= SCROLL_DIVISOR_MIN &&
@@ -114,16 +104,16 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
         if (scroll_x_deadzone_bypass_active &&
             timer_elapsed32(scroll_x_deadzone_bypass_timer) <
                 SCROLL_HORIZONTAL_DEADZONE_BYPASS_MS) {
-            scroll_x_accumulator += x;
+            scroll_x_accumulator +=
+                x * POINTING_DEVICE_HIRES_SCROLL_MULTIPLIER;
         } else {
             scroll_x_deadzone_bypass_active = false;
         }
-        scroll_y_accumulator -= y;
+        scroll_y_accumulator -=
+            y * POINTING_DEVICE_HIRES_SCROLL_MULTIPLIER;
 
-        mouse_report.h =
-            clamp_scroll_delta(scroll_x_accumulator / scroll_divisor);
-        mouse_report.v =
-            clamp_scroll_delta(scroll_y_accumulator / scroll_divisor);
+        mouse_report.h = scroll_x_accumulator / scroll_divisor;
+        mouse_report.v = scroll_y_accumulator / scroll_divisor;
         scroll_x_accumulator %= scroll_divisor;
         scroll_y_accumulator %= scroll_divisor;
         mouse_report.x = 0;
