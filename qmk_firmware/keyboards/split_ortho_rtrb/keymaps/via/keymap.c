@@ -8,6 +8,9 @@
 #define SCROLL_REPORT_INTERVAL_MS 8
 #define SCROLL_HORIZONTAL_DEADZONE 2
 #define SCROLL_HORIZONTAL_DEADZONE_BYPASS_MS 500
+#define SCROLL_ACCELERATION_THRESHOLD_1 4
+#define SCROLL_ACCELERATION_THRESHOLD_2 8
+#define SCROLL_ACCELERATION_THRESHOLD_3 16
 #define AML_TIMEOUT_MIN 100
 #define AML_TIMEOUT_MAX 1000
 #define AML_TIMEOUT_QUANTUM 50
@@ -27,6 +30,21 @@ static uint32_t scroll_x_deadzone_bypass_timer;
 static bool scroll_x_deadzone_bypass_active;
 static uint32_t scroll_report_timer;
 static bool scroll_report_timer_active;
+
+static int32_t accelerate_scroll_delta(int8_t delta) {
+    int16_t magnitude = delta < 0 ? -(int16_t)delta : delta;
+    uint8_t multiplier = 1;
+
+    if (magnitude >= SCROLL_ACCELERATION_THRESHOLD_3) {
+        multiplier = 4;
+    } else if (magnitude >= SCROLL_ACCELERATION_THRESHOLD_2) {
+        multiplier = 3;
+    } else if (magnitude >= SCROLL_ACCELERATION_THRESHOLD_1) {
+        multiplier = 2;
+    }
+
+    return (int32_t)delta * multiplier;
+}
 
 static mouse_hv_report_t clamp_scroll_delta(int32_t delta) {
     if (delta > MOUSE_REPORT_HV_MAX) {
@@ -117,13 +135,13 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
         if (scroll_x_deadzone_bypass_active &&
             timer_elapsed32(scroll_x_deadzone_bypass_timer) <
                 SCROLL_HORIZONTAL_DEADZONE_BYPASS_MS) {
-            scroll_x_accumulator +=
-                x * POINTING_DEVICE_HIRES_SCROLL_MULTIPLIER;
+            scroll_x_accumulator += accelerate_scroll_delta(x) *
+                                    POINTING_DEVICE_HIRES_SCROLL_MULTIPLIER;
         } else {
             scroll_x_deadzone_bypass_active = false;
         }
-        scroll_y_accumulator -=
-            y * POINTING_DEVICE_HIRES_SCROLL_MULTIPLIER;
+        scroll_y_accumulator -= accelerate_scroll_delta(y) *
+                                POINTING_DEVICE_HIRES_SCROLL_MULTIPLIER;
 
         mouse_report.h = 0;
         mouse_report.v = 0;
