@@ -65,6 +65,25 @@ static mouse_hv_report_t clamp_scroll_delta(int32_t delta) {
     return (mouse_hv_report_t)delta;
 }
 
+static mouse_hv_report_t standard_scroll_delta(int32_t delta) {
+    int32_t wheel_divisor =
+        (int32_t)scroll_divisor * POINTING_DEVICE_HIRES_SCROLL_MULTIPLIER;
+    int32_t wheel_ticks = delta / wheel_divisor;
+    int32_t max_wheel_ticks =
+        MOUSE_REPORT_HV_MAX / POINTING_DEVICE_HIRES_SCROLL_MULTIPLIER;
+    int32_t min_wheel_ticks =
+        MOUSE_REPORT_HV_MIN / POINTING_DEVICE_HIRES_SCROLL_MULTIPLIER;
+
+    if (wheel_ticks > max_wheel_ticks) {
+        wheel_ticks = max_wheel_ticks;
+    }
+    if (wheel_ticks < min_wheel_ticks) {
+        wheel_ticks = min_wheel_ticks;
+    }
+    return (mouse_hv_report_t)(wheel_ticks *
+                               POINTING_DEVICE_HIRES_SCROLL_MULTIPLIER);
+}
+
 void keyboard_post_init_user(void) {
     uint32_t stored_scroll_divisor = eeconfig_read_user();
     if (stored_scroll_divisor >= SCROLL_DIVISOR_MIN &&
@@ -136,11 +155,6 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
     if (IS_LAYER_ON(3)) {
         int8_t x = mouse_report.x;
         int8_t y = mouse_report.y;
-        int32_t report_divisor =
-            (int32_t)scroll_divisor *
-            (wheel_extended_enabled
-                 ? 1
-                 : POINTING_DEVICE_HIRES_SCROLL_MULTIPLIER);
 
         if (x <= -SCROLL_HORIZONTAL_DEADZONE ||
             x >= SCROLL_HORIZONTAL_DEADZONE) {
@@ -164,12 +178,17 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
         if (!scroll_report_timer_active ||
             timer_elapsed32(scroll_report_timer) >=
                 SCROLL_REPORT_INTERVAL_MS) {
-            mouse_report.h =
-                clamp_scroll_delta(scroll_x_accumulator / report_divisor);
-            mouse_report.v =
-                clamp_scroll_delta(scroll_y_accumulator / report_divisor);
-            scroll_x_accumulator -= mouse_report.h * report_divisor;
-            scroll_y_accumulator -= mouse_report.v * report_divisor;
+            if (wheel_extended_enabled) {
+                mouse_report.h =
+                    clamp_scroll_delta(scroll_x_accumulator / scroll_divisor);
+                mouse_report.v =
+                    clamp_scroll_delta(scroll_y_accumulator / scroll_divisor);
+            } else {
+                mouse_report.h = standard_scroll_delta(scroll_x_accumulator);
+                mouse_report.v = standard_scroll_delta(scroll_y_accumulator);
+            }
+            scroll_x_accumulator -= mouse_report.h * scroll_divisor;
+            scroll_y_accumulator -= mouse_report.v * scroll_divisor;
 
             if (mouse_report.h != 0 || mouse_report.v != 0) {
                 scroll_report_timer = timer_read32();

@@ -54,6 +54,10 @@ decrease it by 50 ms (`AML_D50`). In Remap/VIA, these custom keycodes are shown
 as `Kb10`, `Kb11`, and `Kb12`. The timeout can be adjusted from 100 ms to 1000
 ms. The fourth key of that row toggles high-resolution wheel reports
 (`CK_WHEEL_EXTENDED_TOGGLE`, shown as `User2` in Remap/VIA). They are enabled
-by default after startup; disabling them switches to standard wheel reports
-without changing the overall scroll distance. This setting is temporary and is
-not saved in EEPROM.
+by default after startup. When disabled, scroll reports are quantized to
+standard wheel-notch increments (multiples of 120), preserving the total scroll
+distance while avoiding fractional high-resolution steps. This setting is
+temporary and is not saved in EEPROM. QMK's HID report descriptor is fixed at
+build time, so the device continues to advertise high-resolution scroll support
+until it is unplugged or re-enumerated; the toggle changes the reports, not the
+descriptor.
