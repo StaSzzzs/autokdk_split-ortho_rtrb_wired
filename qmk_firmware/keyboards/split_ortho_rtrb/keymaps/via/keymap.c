@@ -7,6 +7,7 @@
 #define SCROLL_DIVISOR_MAX 16
 #define SCROLL_REPORT_INTERVAL_MS 8
 #define SCROLL_HORIZONTAL_DEADZONE 2
+#define SCROLL_HORIZONTAL_DEADZONE_STANDARD_MULTIPLIER 3
 #define SCROLL_HORIZONTAL_DEADZONE_BYPASS_MS 500
 #define SCROLL_ACCELERATION_THRESHOLD_1 4
 #define SCROLL_ACCELERATION_THRESHOLD_2 8
@@ -155,9 +156,13 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
     if (IS_LAYER_ON(3)) {
         int8_t x = mouse_report.x;
         int8_t y = mouse_report.y;
+        int16_t scroll_x_deadzone =
+            SCROLL_HORIZONTAL_DEADZONE *
+            (wheel_extended_enabled
+                 ? 1
+                 : SCROLL_HORIZONTAL_DEADZONE_STANDARD_MULTIPLIER);
 
-        if (x <= -SCROLL_HORIZONTAL_DEADZONE ||
-            x >= SCROLL_HORIZONTAL_DEADZONE) {
+        if (x <= -scroll_x_deadzone || x >= scroll_x_deadzone) {
             scroll_x_deadzone_bypass_timer = timer_read32();
             scroll_x_deadzone_bypass_active = true;
         }
