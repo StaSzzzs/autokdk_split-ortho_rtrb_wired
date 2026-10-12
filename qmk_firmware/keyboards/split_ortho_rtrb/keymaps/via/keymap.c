@@ -21,15 +21,24 @@ enum custom_keycodes {
     AML_D50 = QK_KB_12,
     CK_SCROLL_SLOWER = SAFE_RANGE,
     CK_SCROLL_FASTER,
+    CK_WHEEL_EXTENDED_TOGGLE,
 };
 
 static uint8_t scroll_divisor = SCROLL_DIVISOR_DEFAULT;
+static bool wheel_extended_enabled = true;
 static int32_t scroll_x_accumulator;
 static int32_t scroll_y_accumulator;
 static uint32_t scroll_x_deadzone_bypass_timer;
 static bool scroll_x_deadzone_bypass_active;
 static uint32_t scroll_report_timer;
 static bool scroll_report_timer_active;
+
+static void reset_scroll_state(void) {
+    scroll_x_accumulator = 0;
+    scroll_y_accumulator = 0;
+    scroll_x_deadzone_bypass_active = false;
+    scroll_report_timer_active = false;
+}
 
 static int32_t accelerate_scroll_delta(int8_t delta) {
     int16_t magnitude = delta < 0 ? -(int16_t)delta : delta;
@@ -104,17 +113,19 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if (scroll_divisor < SCROLL_DIVISOR_MAX) {
                 scroll_divisor++;
                 eeconfig_update_user(scroll_divisor);
-                scroll_x_accumulator = 0;
-                scroll_y_accumulator = 0;
+                reset_scroll_state();
             }
             return false;
         case CK_SCROLL_FASTER:
             if (scroll_divisor > SCROLL_DIVISOR_MIN) {
                 scroll_divisor--;
                 eeconfig_update_user(scroll_divisor);
-                scroll_x_accumulator = 0;
-                scroll_y_accumulator = 0;
+                reset_scroll_state();
             }
+            return false;
+        case CK_WHEEL_EXTENDED_TOGGLE:
+            wheel_extended_enabled = !wheel_extended_enabled;
+            reset_scroll_state();
             return false;
     }
 
@@ -125,6 +136,11 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
     if (IS_LAYER_ON(3)) {
         int8_t x = mouse_report.x;
         int8_t y = mouse_report.y;
+        int32_t report_divisor =
+            (int32_t)scroll_divisor *
+            (wheel_extended_enabled
+                 ? 1
+                 : POINTING_DEVICE_HIRES_SCROLL_MULTIPLIER);
 
         if (x <= -SCROLL_HORIZONTAL_DEADZONE ||
             x >= SCROLL_HORIZONTAL_DEADZONE) {
@@ -149,11 +165,11 @@ report_mouse_t pointing_device_task_user(report_mouse_t mouse_report) {
             timer_elapsed32(scroll_report_timer) >=
                 SCROLL_REPORT_INTERVAL_MS) {
             mouse_report.h =
-                clamp_scroll_delta(scroll_x_accumulator / scroll_divisor);
+                clamp_scroll_delta(scroll_x_accumulator / report_divisor);
             mouse_report.v =
-                clamp_scroll_delta(scroll_y_accumulator / scroll_divisor);
-            scroll_x_accumulator -= mouse_report.h * scroll_divisor;
-            scroll_y_accumulator -= mouse_report.v * scroll_divisor;
+                clamp_scroll_delta(scroll_y_accumulator / report_divisor);
+            scroll_x_accumulator -= mouse_report.h * report_divisor;
+            scroll_y_accumulator -= mouse_report.v * report_divisor;
 
             if (mouse_report.h != 0 || mouse_report.v != 0) {
                 scroll_report_timer = timer_read32();
@@ -211,7 +227,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TRNS, KC_F1, KC_F2, KC_F3, KC_F4, KC_F5,
         KC_TAB, KC_TRNS, KC_HOME, KC_UP, KC_END, KC_PGUP,
         KC_TRNS, KC_TRNS, KC_LEFT, KC_DOWN, KC_RIGHT, KC_PGDN,
-        AML_TO, AML_I50, AML_D50, KC_TRNS, (QK_LALT | QK_LGUI | KC_K), QK_MACRO_2,
+        AML_TO, AML_I50, AML_D50, CK_WHEEL_EXTENDED_TOGGLE, (QK_LALT | QK_LGUI | KC_K), QK_MACRO_2,
         KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
         KC_TRNS, KC_TRNS, KC_F6, KC_F7, KC_F8, KC_F9,
         KC_F10, KC_F11, KC_VOLU, KC_KP_7, KC_KP_8, KC_KP_9,

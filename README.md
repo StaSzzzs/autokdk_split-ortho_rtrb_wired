@@ -52,4 +52,8 @@ threshold are unchanged. On Layer 3, the first three keys of the fourth row
 toggle the feature (`AML_TO`), increase its timeout by 50 ms (`AML_I50`), and
 decrease it by 50 ms (`AML_D50`). In Remap/VIA, these custom keycodes are shown
 as `Kb10`, `Kb11`, and `Kb12`. The timeout can be adjusted from 100 ms to 1000
-ms.
+ms. The fourth key of that row toggles high-resolution wheel reports
+(`CK_WHEEL_EXTENDED_TOGGLE`, shown as `User2` in Remap/VIA). They are enabled
+by default after startup; disabling them switches to standard wheel reports
+without changing the overall scroll distance. This setting is temporary and is
+not saved in EEPROM.
