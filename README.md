@@ -35,16 +35,16 @@ Layer 3 switches the trackball from pointer movement to scrolling. Recreate
 macro contents in Remap if they do not carry over from the previous firmware.
 Scrolling reverses the vertical direction and defaults to one quarter of the
 previous sensitivity. High-resolution wheel reports provide finer tracking
-without changing the total scroll distance or horizontal deadzone. Scroll
+without changing the total scroll distance. Scroll
 reports are limited to one every 8 ms; movement during that interval is
 accumulated and sent in the next report. On Layer 1, the two keys next to
 `QK_BOOT`
 (`CK_SCROLL_SLOWER` and `CK_SCROLL_FASTER`) decrease or increase scroll speed;
 the selected speed is saved in EEPROM. In Remap/VIA, these custom keycodes are
-shown as `User0` and `User1`. The horizontal deadzone is half its previous size;
-when high-resolution wheel reports are disabled, the initial horizontal
-deadzone is tripled. After movement crosses the applicable threshold, the
-deadzone is disabled for 500 ms.
+shown as `User0` and `User1`. The initial horizontal deadzone ignores x movement
+up to 10% of the y movement (20% when high-resolution wheel reports are
+disabled). After x movement exceeds that ratio, the deadzone is disabled for
+500 ms.
 The automatic mouse layer is enabled by default on startup. Layer 4 is its
 target: trackball activity activates it, and it
 deactivates after 650 ms without mouse activity. It overlays the active layer,
