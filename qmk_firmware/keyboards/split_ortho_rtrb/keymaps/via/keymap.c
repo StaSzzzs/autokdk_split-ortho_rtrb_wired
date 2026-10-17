@@ -1,5 +1,6 @@
 #include QMK_KEYBOARD_H
 #include "eeconfig.h"
+#include "send_string.h"
 
 #define DEFAULT_CPI 1500
 #define SCROLL_DIVISOR_DEFAULT 4
@@ -23,6 +24,7 @@ enum custom_keycodes {
     CK_SCROLL_SLOWER = SAFE_RANGE,
     CK_SCROLL_FASTER,
     CK_WHEEL_EXTENDED_TOGGLE,
+    CK_SHOW_SETTINGS,
 };
 
 static uint8_t scroll_divisor = SCROLL_DIVISOR_DEFAULT;
@@ -83,6 +85,34 @@ static mouse_hv_report_t standard_scroll_delta(int32_t delta) {
     }
     return (mouse_hv_report_t)(wheel_ticks *
                                POINTING_DEVICE_HIRES_SCROLL_MULTIPLIER);
+}
+
+static void send_unsigned(uint16_t value) {
+    char digits[5];
+    uint8_t length = 0;
+
+    do {
+        digits[length++] = '0' + value % 10;
+        value /= 10;
+    } while (value > 0);
+
+    while (length > 0) {
+        send_char(digits[--length]);
+    }
+}
+
+static void send_settings(void) {
+    SEND_STRING("AML: ");
+    if (get_auto_mouse_enable()) {
+        SEND_STRING("ON");
+    } else {
+        SEND_STRING("OFF");
+    }
+    SEND_STRING(" | AML timeout: ");
+    send_unsigned(get_auto_mouse_timeout());
+    SEND_STRING(" ms | Scroll speed divisor: ");
+    send_unsigned(scroll_divisor);
+    SEND_STRING("\n");
 }
 
 void keyboard_post_init_user(void) {
@@ -146,6 +176,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case CK_WHEEL_EXTENDED_TOGGLE:
             wheel_extended_enabled = !wheel_extended_enabled;
             reset_scroll_state();
+            return false;
+        case CK_SHOW_SETTINGS:
+            send_settings();
             return false;
     }
 
@@ -228,7 +261,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         LGUI(KC_TAB), KC_TRNS, KC_HOME, LGUI(KC_UP), KC_END, KC_PGUP,
         KC_TRNS, KC_TRNS, LGUI(KC_LEFT), LGUI(KC_DOWN), LGUI(KC_RIGHT), KC_PGDN,
         KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
-        QK_BOOT, CK_SCROLL_SLOWER, CK_SCROLL_FASTER, KC_TRNS, KC_TRNS, KC_TRNS,
+        QK_BOOT, CK_SCROLL_SLOWER, CK_SCROLL_FASTER, CK_SHOW_SETTINGS, KC_TRNS, KC_TRNS,
         KC_TRNS, QK_MACRO_1, KC_F6, KC_F7, KC_F8, KC_F9,
         KC_F10, KC_F11, KC_TRNS, KC_TRNS, (QK_LCTL | QK_LGUI | KC_LEFT), SGUI(KC_LEFT),
         KC_F12, KC_TRNS, KC_TRNS, SGUI(KC_LEFT), (QK_LCTL | QK_LGUI | KC_RIGHT), SGUI(KC_RIGHT),

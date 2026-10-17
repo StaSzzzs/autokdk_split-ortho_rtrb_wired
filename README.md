@@ -62,4 +62,8 @@ distance while avoiding fractional high-resolution steps. This setting is
 temporary and is not saved in EEPROM. QMK's HID report descriptor is fixed at
 build time, so the device continues to advertise high-resolution scroll support
 until it is unplugged or re-enumerated; the toggle changes the reports, not the
-descriptor.
+descriptor. Press `CK_SHOW_SETTINGS` to type the current AML enabled state,
+AML timeout in milliseconds, and scroll speed divisor as a line of text. On
+Layer 1, it is assigned to the key immediately to the right of
+`CK_SCROLL_FASTER` and is shown as `User3` in Remap/VIA. The AML, scroll-speed,
+and wheel-mode keys only change their settings.
